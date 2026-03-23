@@ -45,9 +45,14 @@ router.post('/register', async (req, res) => {
     const { username, password, role, adminKey } = req.body;
 
     if (role === 'admin') {
-      if (!adminKey || adminKey !== ADMIN_REGISTER_KEY) {
-        return res.status(401).json({ message: '管理员认证密钥错误，无法注册管理员账号' });
+      const existingAdmin = await User.findOne({ role: 'admin' });
+      if (!existingAdmin) {
+        // 如果还没有管理员，则需要密钥注册第一个管理员
+        if (!adminKey || adminKey !== ADMIN_REGISTER_KEY) {
+          return res.status(401).json({ message: '管理员认证密钥错误，无法注册管理员账号' });
+        }
       }
+      // 已有管理员时可直接注册无需密钥
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
