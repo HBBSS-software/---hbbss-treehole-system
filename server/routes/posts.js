@@ -6,32 +6,6 @@ const auth = require('../middleware/auth');
 
 const router = express.Router();
 
-// Create post
-
-router.post('/', auth, async (req, res) => {
-
-  try {
-
-    const { title, content, images, poll, sectionId } = req.body;
-
-    const user = req.user;
-
-    const status = user.role === 'admin' ? 'approved' : 'pending';
-
-    const post = new Post({ title, content, images, poll, author: user._id, section: sectionId, status });
-
-    await post.save();
-
-    res.status(201).json(post);
-
-  } catch (e) {
-
-    res.status(400).send(e.message);
-
-  }
-
-});
-
 // Get all posts (for admin)
 
 router.get('/', auth, async (req, res) => {
@@ -65,6 +39,32 @@ router.get('/section/:sectionId', async (req, res) => {
   } catch (e) {
 
     res.status(500).send(e.message);
+
+  }
+
+});
+
+// Create post
+
+router.post('/', auth, async (req, res) => {
+
+  try {
+
+    const { title, content, images, poll, sectionId } = req.body;
+
+    const user = req.user;
+
+    const status = user.role === 'admin' ? 'approved' : 'pending';
+
+    const post = new Post({ title, content, images, poll, author: user._id, section: sectionId, status });
+
+    await post.save();
+
+    res.status(201).json(post);
+
+  } catch (e) {
+
+    res.status(400).send(e.message);
 
   }
 

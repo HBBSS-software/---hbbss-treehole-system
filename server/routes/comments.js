@@ -6,6 +6,24 @@ const auth = require('../middleware/auth');
 
 const router = express.Router();
 
+// Get comments for post
+
+router.get('/post/:postId', async (req, res) => {
+
+  try {
+
+    const comments = await Comment.find({ post: req.params.postId }).populate('author', 'username');
+
+    res.json(comments);
+
+  } catch (e) {
+
+    res.status(500).send(e.message);
+
+  }
+
+});
+
 // Create comment
 
 router.post('/', auth, async (req, res) => {
@@ -23,24 +41,6 @@ router.post('/', auth, async (req, res) => {
   } catch (e) {
 
     res.status(400).send(e.message);
-
-  }
-
-});
-
-// Get comments for post
-
-router.get('/post/:postId', async (req, res) => {
-
-  try {
-
-    const comments = await Comment.find({ post: req.params.postId }).populate('author', 'username');
-
-    res.json(comments);
-
-  } catch (e) {
-
-    res.status(500).send(e.message);
 
   }
 

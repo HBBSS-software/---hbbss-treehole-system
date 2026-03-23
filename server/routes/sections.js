@@ -6,32 +6,6 @@ const auth = require('../middleware/auth');
 
 const router = express.Router();
 
-// Create section
-
-router.post('/', auth, async (req, res) => {
-
-  try {
-
-    const { name, description } = req.body;
-
-    const user = req.user;
-
-    const status = user.role === 'admin' ? 'approved' : 'pending';
-
-    const section = new Section({ name, description, creator: user._id, moderator: user._id, status });
-
-    await section.save();
-
-    res.status(201).json(section);
-
-  } catch (e) {
-
-    res.status(400).send(e.message);
-
-  }
-
-});
-
 // Get all sections (for admin)
 
 router.get('/admin/all', auth, async (req, res) => {
@@ -65,6 +39,32 @@ router.get('/', async (req, res) => {
   } catch (e) {
 
     res.status(500).send(e.message);
+
+  }
+
+});
+
+// Create section
+
+router.post('/', auth, async (req, res) => {
+
+  try {
+
+    const { name, description } = req.body;
+
+    const user = req.user;
+
+    const status = user.role === 'admin' ? 'approved' : 'pending';
+
+    const section = new Section({ name, description, creator: user._id, moderator: user._id, status });
+
+    await section.save();
+
+    res.status(201).json(section);
+
+  } catch (e) {
+
+    res.status(400).send(e.message);
 
   }
 
