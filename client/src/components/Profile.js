@@ -7,6 +7,9 @@ export default function Profile({ user, onUserUpdate }) {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -14,17 +17,68 @@ export default function Profile({ user, onUserUpdate }) {
     }
   }, [user]);
 
+  const handleAvatarChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setAvatarFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const uploadAvatar = async () => {
+    if (!avatarFile) return null;
+
+    setUploadingAvatar(true);
+    const formData = new FormData();
+    formData.append('avatar', avatarFile);
+
+    try {
+      const response = await axios.post('/api/auth/upload-avatar', formData, {
+        headers: { 
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      return response.data.avatar;
+    } catch (err) {
+      console.error('头像上传失败:', err);
+      setError('头像上传失败');
+      return null;
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
   const handleSave = async () => {
     setLoading(true);
     setError('');
 
     try {
+      // 先上传头像（如果有的话）
+      let newAvatarUrl = user.avatar;
+      if (avatarFile) {
+        const uploadedAvatar = await uploadAvatar();
+        if (uploadedAvatar) {
+          newAvatarUrl = uploadedAvatar;
+        }
+      }
+
+      // 更新用户信息
       const response = await axios.put('/api/auth/user', { description }, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
 
-      onUserUpdate(response.data);
+      // 更新本地状态
+      const updatedUser = { ...response.data, avatar: newAvatarUrl };
+      onUserUpdate(updatedUser);
+      
       setIsEditing(false);
+      setAvatarFile(null);
+      setAvatarPreview(null);
     } catch (err) {
       setError(err.response?.data || '更新失败');
     } finally {
@@ -36,6 +90,8 @@ export default function Profile({ user, onUserUpdate }) {
     setDescription(user.description || '');
     setIsEditing(false);
     setError('');
+    setAvatarFile(null);
+    setAvatarPreview(null);
   };
 
   if (!user) {
@@ -50,11 +106,27 @@ export default function Profile({ user, onUserUpdate }) {
 
       <div className="profile-content">
         <div className="profile-avatar-section">
-          {user.avatar ? (
+          {avatarPreview ? (
+            <img src={avatarPreview} alt={user.username} className="profile-avatar" />
+          ) : user.avatar ? (
             <img src={user.avatar} alt={user.username} className="profile-avatar" />
           ) : (
             <div className="profile-avatar-placeholder">
               {user.username.charAt(0).toUpperCase()}
+            </div>
+          )}
+          {isEditing && (
+            <div className="avatar-upload-section">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarChange}
+                id="profile-avatar-input"
+              />
+              <label htmlFor="profile-avatar-input" className="file-label">
+                选择新头像
+              </label>
+              {uploadingAvatar && <div className="uploading">上传中...</div>}
             </div>
           )}
         </div>
