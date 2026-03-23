@@ -36,14 +36,27 @@ if (!fs.existsSync(avatarDir)) {
   fs.mkdirSync(avatarDir, { recursive: true });
 }
 
+// 管理员注册密钥（可从环境变量读取）
+const ADMIN_REGISTER_KEY = process.env.ADMIN_REGISTER_KEY || 'thisisthepasswordfortheadminregister%114514';
+
 // Register
 router.post('/register', async (req, res) => {
   try {
-    const { username, password, role } = req.body;
+    const { username, password, role, adminKey } = req.body;
+
+    if (role === 'admin') {
+      if (!adminKey || adminKey !== ADMIN_REGISTER_KEY) {
+        return res.status(401).json({ message: '管理员认证密钥错误，无法注册管理员账号' });
+      }
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = new User({ username, password: hashedPassword, role: role || 'user' });
     await user.save();
-    res.status(201).json({ message: 'User registered', userId: user._id });
+
+    // 返回登录令牌，方便注册后立即使用头像上传等功能
+    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET);
+    res.status(201).json({ message: 'User registered', userId: user._id, token, user: { _id: user._id, username: user.username, role: user.role, avatar: user.avatar }});
   } catch (e) {
     res.status(400).send(e.message);
   }

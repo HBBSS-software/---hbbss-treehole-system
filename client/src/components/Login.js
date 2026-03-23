@@ -7,6 +7,7 @@ export default function Login({ onLogin }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('user');
+  const [adminKey, setAdminKey] = useState('');
   const [avatar, setAvatar] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [isLogin, setIsLogin] = useState(true);
@@ -54,7 +55,7 @@ export default function Login({ onLogin }) {
 
     try {
       const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
-      const data = isLogin ? { username, password } : { username, password, role };
+      const data = isLogin ? { username, password } : { username, password, role, adminKey };
       
       const response = await axios.post(endpoint, data);
       
@@ -71,6 +72,8 @@ export default function Login({ onLogin }) {
         setError('');
         setUsername('');
         setPassword('');
+        setRole('user');
+        setAdminKey('');
         setAvatar(null);
         setAvatarPreview(null);
         alert('注册成功！请登录');
@@ -117,11 +120,27 @@ export default function Login({ onLogin }) {
             <>
               <div className="form-group">
                 <label>身份</label>
-                <select value={role} onChange={(e) => setRole(e.target.value)}>
+                <select value={role} onChange={(e) => {
+                  setRole(e.target.value);
+                  setAdminKey('');
+                }}>
                   <option value="user">普通用户</option>
                   <option value="admin">管理员</option>
                 </select>
               </div>
+
+              {role === 'admin' && (
+                <div className="form-group">
+                  <label>管理员认证密钥</label>
+                  <input
+                    type="password"
+                    value={adminKey}
+                    onChange={(e) => setAdminKey(e.target.value)}
+                    required
+                    placeholder="请输入管理员注册密钥"
+                  />
+                </div>
+              )}
 
               <div className="form-group">
                 <label>头像</label>
@@ -157,26 +176,6 @@ export default function Login({ onLogin }) {
             setError('');
             setAvatarPreview(null);
             setAvatar(null);
-          }}>
-            {isLogin ? '注册' : '登录'}
-          </button>
-        </p>
-      </div>
-    </div>
-  );
-}
-          )}
-
-          <button type="submit" disabled={loading}>
-            {loading ? '处理中...' : (isLogin ? '登录' : '注册')}
-          </button>
-        </form>
-
-        <p className="toggle-auth">
-          {isLogin ? '还没账号？' : '已有账号？'}
-          <button type="button" onClick={() => {
-            setIsLogin(!isLogin);
-            setError('');
           }}>
             {isLogin ? '注册' : '登录'}
           </button>
