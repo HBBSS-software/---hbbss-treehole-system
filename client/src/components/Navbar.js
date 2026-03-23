@@ -19,6 +19,9 @@ export default function Navbar({ user, onLogout }) {
         
         {user && (
           <div className="nav-right">
+            {user.avatar && (
+              <img src={user.avatar} alt={user.username} className="user-avatar" title={user.username} />
+            )}
             <span className="user-info">
               欢迎，{user.username}
               {user.role === 'admin' && <span className="admin-badge">管理员</span>}
