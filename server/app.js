@@ -22,6 +22,11 @@ app.use('/api/sections', require('./routes/sections'));
 app.use('/api/posts', require('./routes/posts'));
 app.use('/api/comments', require('./routes/comments'));
 
+// Root route
+app.get('/', (req, res) => {
+  res.json({ message: '🌳 树洞系统 API 运行中', info: '前端应用在 http://localhost:3000' });
+});
+
 app.post('/api/upload', upload.single('image'), (req, res) => {
   res.json({ url: `/uploads/${req.file.filename}` });
 });
