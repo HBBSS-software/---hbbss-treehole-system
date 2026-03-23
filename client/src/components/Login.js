@@ -131,14 +131,16 @@ export default function Login({ onLogin }) {
 
               {role === 'admin' && (
                 <div className="form-group">
-                  <label>管理员认证密钥</label>
+                  <label>管理员认证密钥（首位管理员必填；已有管理员则可不填）</label>
                   <input
                     type="password"
                     value={adminKey}
                     onChange={(e) => setAdminKey(e.target.value)}
-                    required
                     placeholder="请输入管理员注册密钥"
                   />
+                  <small style={{ color: '#666' }}>
+                    如果已经存在管理员账户，可留空；若是首位管理员则必须用密钥注册。
+                  </small>
                 </div>
               )}
 

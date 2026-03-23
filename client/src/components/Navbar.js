@@ -26,6 +26,9 @@ export default function Navbar({ user, onLogout }) {
               欢迎，{user.username}
               {user.role === 'admin' && <span className="admin-badge">管理员</span>}
             </span>
+            <Link to="/profile" className="nav-link profile-link">
+              账户管理
+            </Link>
             {user.role === 'admin' && (
               <Link to="/admin" className="nav-link admin-link">
                 管理后台

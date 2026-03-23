@@ -7,6 +7,7 @@ import Home from './components/Home';
 import Section from './components/Section';
 import Post from './components/Post';
 import Admin from './components/Admin';
+import Profile from './components/Profile';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -27,10 +28,9 @@ function App() {
     setUser(userData);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setUser(null);
+  const handleUserUpdate = (updatedUser) => {
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+    setUser(updatedUser);
   };
 
   if (loading) {
@@ -45,6 +45,7 @@ function App() {
         <Route path="/" element={user ? <Home user={user} /> : <Navigate to="/login" />} />
         <Route path="/section/:id" element={user ? <Section user={user} /> : <Navigate to="/login" />} />
         <Route path="/post/:id" element={user ? <Post user={user} /> : <Navigate to="/login" />} />
+        <Route path="/profile" element={user ? <Profile user={user} onUserUpdate={handleUserUpdate} /> : <Navigate to="/login" />} />
         {user?.role === 'admin' && <Route path="/admin" element={<Admin user={user} />} />}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

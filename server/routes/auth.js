@@ -108,4 +108,19 @@ router.get('/user', auth, async (req, res) => {
   }
 });
 
+// 更新用户信息
+router.put('/user', auth, async (req, res) => {
+  try {
+    const { description } = req.body;
+    const user = await User.findByIdAndUpdate(
+      req.user._id, 
+      { description }, 
+      { new: true }
+    ).select('-password');
+    res.json(user);
+  } catch (e) {
+    res.status(500).send(e.message);
+  }
+});
+
 module.exports = router;
