@@ -1,0 +1,73 @@
+const express = require('express');
+
+const Section = require('../models/Section');
+
+const auth = require('../middleware/auth');
+
+const router = express.Router();
+
+// Create section
+
+router.post('/', auth, async (req, res) => {
+
+  try {
+
+    const { name, description } = req.body;
+
+    const user = req.user;
+
+    const status = user.role === 'admin' ? 'approved' : 'pending';
+
+    const section = new Section({ name, description, creator: user._id, moderator: user._id, status });
+
+    await section.save();
+
+    res.status(201).json(section);
+
+  } catch (e) {
+
+    res.status(400).send(e.message);
+
+  }
+
+});
+
+// Get all approved sections
+
+router.get('/', async (req, res) => {
+
+  try {
+
+    const sections = await Section.find({ status: 'approved' }).populate('moderator', 'username');
+
+    res.json(sections);
+
+  } catch (e) {
+
+    res.status(500).send(e.message);
+
+  }
+
+});
+
+// Admin approve section
+
+router.put('/:id/approve', auth, async (req, res) => {
+
+  try {
+
+    if (req.user.role !== 'admin') return res.status(403).send('Forbidden');
+
+    await Section.findByIdAndUpdate(req.params.id, { status: 'approved' });
+
+    res.send('Approved');
+
+  } catch (e) {
+
+    res.status(400).send(e.message);
+
+  }
+
+});
+
+module.exports = router;
