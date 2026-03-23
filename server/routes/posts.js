@@ -32,6 +32,26 @@ router.post('/', auth, async (req, res) => {
 
 });
 
+// Get all posts (for admin)
+
+router.get('/', auth, async (req, res) => {
+
+  try {
+
+    if (req.user.role !== 'admin') return res.status(403).send('Forbidden');
+
+    const posts = await Post.find().populate('author', 'username');
+
+    res.json(posts);
+
+  } catch (e) {
+
+    res.status(500).send(e.message);
+
+  }
+
+});
+
 // Get posts in section
 
 router.get('/section/:sectionId', async (req, res) => {

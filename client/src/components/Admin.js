@@ -18,7 +18,7 @@ export default function Admin({ user }) {
       const token = localStorage.getItem('token');
       
       if (activeTab === 'sections') {
-        const res = await axios.get('/api/sections', {
+        const res = await axios.get('/api/sections/admin/all', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setSections(res.data);

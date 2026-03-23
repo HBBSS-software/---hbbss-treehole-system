@@ -32,6 +32,26 @@ router.post('/', auth, async (req, res) => {
 
 });
 
+// Get all sections (for admin)
+
+router.get('/admin/all', auth, async (req, res) => {
+
+  try {
+
+    if (req.user.role !== 'admin') return res.status(403).send('Forbidden');
+
+    const sections = await Section.find().populate('moderator', 'username').populate('creator', 'username');
+
+    res.json(sections);
+
+  } catch (e) {
+
+    res.status(500).send(e.message);
+
+  }
+
+});
+
 // Get all approved sections
 
 router.get('/', async (req, res) => {
@@ -41,6 +61,26 @@ router.get('/', async (req, res) => {
     const sections = await Section.find({ status: 'approved' }).populate('moderator', 'username');
 
     res.json(sections);
+
+  } catch (e) {
+
+    res.status(500).send(e.message);
+
+  }
+
+});
+
+// Get single section
+
+router.get('/:id', async (req, res) => {
+
+  try {
+
+    const section = await Section.findById(req.params.id).populate('moderator', 'username');
+
+    if (!section) return res.status(404).send('Section not found');
+
+    res.json(section);
 
   } catch (e) {
 
