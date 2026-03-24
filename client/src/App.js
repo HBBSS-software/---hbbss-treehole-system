@@ -33,13 +33,19 @@ function App() {
     setUser(updatedUser);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+  };
+
   if (loading) {
     return <div className="loading">加载中...</div>;
   }
 
   return (
     <Router>
-      <Navbar user={user} onLogout={handleLogout} />
+      <Navbar user={user} onLogout={handleLogout} onUserUpdate={handleUserUpdate} />
       <Routes>
         <Route path="/login" element={!user ? <Login onLogin={handleLogin} /> : <Navigate to="/" />} />
         <Route path="/" element={user ? <Home user={user} /> : <Navigate to="/login" />} />
