@@ -56,7 +56,8 @@ export default function Navbar({ user, onLogout, onUserUpdate }) {
       setAvatarFile(null);
       setAvatarPreview(null);
     } catch (err) {
-      setError(err.response?.data || '头像上传失败');
+      const errorMsg = err.response?.data?.error || err.response?.data || '头像上传失败';
+      setError(typeof errorMsg === 'string' ? errorMsg : '头像上传失败');
     } finally {
       setUploading(false);
     }

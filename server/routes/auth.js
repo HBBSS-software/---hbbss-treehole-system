@@ -86,7 +86,7 @@ router.post('/login', async (req, res) => {
 router.post('/upload-avatar', auth, upload.single('avatar'), async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).send('没有上传文件');
+      return res.status(400).json({ error: '没有上传文件' });
     }
 
     const avatarUrl = `/uploads/avatars/${req.file.filename}`;
@@ -94,7 +94,7 @@ router.post('/upload-avatar', auth, upload.single('avatar'), async (req, res) =>
     
     res.json({ avatar: user.avatar, message: '头像上传成功' });
   } catch (e) {
-    res.status(400).send(e.message);
+    res.status(400).json({ error: e.message });
   }
 });
 
