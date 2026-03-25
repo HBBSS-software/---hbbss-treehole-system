@@ -16,7 +16,7 @@ router.get('/admin/all', auth, async (req, res) => {
 // Search sections - MUST be before /:id
 router.get('/search', async (req, res) => {
   try {
-    const q = req.query.q || '';
+    const q = (req.query.q || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(q, 'i');
     const sections = await Section.find({
       status: 'approved',

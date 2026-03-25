@@ -16,7 +16,7 @@ router.get('/', auth, async (req, res) => {
 // Search posts - MUST be before /:id
 router.get('/search', async (req, res) => {
   try {
-    const q = req.query.q || '';
+    const q = (req.query.q || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(q, 'i');
     const posts = await Post.find({
       status: 'approved',
