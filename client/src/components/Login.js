@@ -13,7 +13,6 @@ export default function Login({ onLogin }) {
   const [isLogin, setIsLogin] = useState(true);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [userId, setUserId] = useState(null);
   const navigate = useNavigate();
 
   const handleAvatarChange = (e) => {
@@ -66,7 +65,7 @@ export default function Login({ onLogin }) {
         // 注册后上传头像
         const token = response.data?.token;
         if (avatar && token) {
-          const avatarUrl = await uploadAvatar(token);
+          await uploadAvatar(token);
         }
         
         setError('');

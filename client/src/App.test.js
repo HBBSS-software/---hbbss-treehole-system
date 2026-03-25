@@ -1,8 +1,8 @@
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import App from './App';
 
-test('renders learn react link', () => {
-  render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+test('App renders without crashing', () => {
+  Storage.prototype.getItem = jest.fn(() => null);
+  const { container } = render(<App />);
+  expect(container).toBeTruthy();
 });
