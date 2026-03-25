@@ -321,3 +321,37 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+.notif-wrapper {
+  position: relative;
+}
+
+.bell-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  position: relative;
+  padding: 0.25rem 0.5rem;
+  line-height: 1;
+  transition: transform 0.2s;
+}
+
+.bell-btn:hover {
+  transform: scale(1.15);
+}
+
+.notif-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #ff4757;
+  color: white;
+  border-radius: 10px;
+  padding: 1px 5px;
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 16px;
+  text-align: center;
+  line-height: 1.4;
+}
