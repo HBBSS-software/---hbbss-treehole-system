@@ -1,4 +1,4 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
+﻿import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
 import Navbar from './components/Navbar';
@@ -10,6 +10,7 @@ const Post = lazy(() => import('./components/Post'));
 const Admin = lazy(() => import('./components/Admin'));
 const Profile = lazy(() => import('./components/Profile'));
 const UserProfile = lazy(() => import('./components/UserProfile'));
+const Friends = lazy(() => import('./components/Friends'));
 
 function App() {
   const [user, setUser] = useState(null);
@@ -46,6 +47,7 @@ function App() {
           <Route path="/post/:id" element={user ? <Post user={user} /> : <Navigate to="/login" />} />
           <Route path="/profile" element={user ? <Profile user={user} onUserUpdate={handleUserUpdate} /> : <Navigate to="/login" />} />
           <Route path="/user/:userId" element={user ? <UserProfile user={user} /> : <Navigate to="/login" />} />
+          <Route path="/friends" element={user ? <Friends user={user} /> : <Navigate to="/login" />} />
           {user?.role === 'admin' && <Route path="/admin" element={<Admin user={user} />} />}
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>

@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
@@ -12,7 +12,7 @@ const router = express.Router();
 
 // Multer配置
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => { cb(null, 'uploads/avatars'); },
+    destination: (req, file, cb) => { cb(null, path.join(__dirname, '../..', 'uploads/avatars')); },
     filename: (req, file, cb) => { cb(null, `${Date.now()}-${file.originalname}`); }
 });
 const upload = multer({

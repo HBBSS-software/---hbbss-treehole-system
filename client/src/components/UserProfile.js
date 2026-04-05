@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import './UserProfile.css';
@@ -7,6 +7,8 @@ export default function UserProfile({ user }) {
   const { userId } = useParams();
   const [profileUser, setProfileUser] = useState(null);
   const [following, setFollowing] = useState(false);
+  const [friendStatus, setFriendStatus] = useState('none');
+  const [friendRequestId, setFriendRequestId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
@@ -24,6 +26,11 @@ export default function UserProfile({ user }) {
         const token = localStorage.getItem('token');
         const meRes = await axios.get('/api/auth/user', { headers: { Authorization: `Bearer ${token}` } });
         setFollowing(meRes.data.following?.some(id => id === userId || id?._id === userId) || false);
+        try {
+          const friendRes = await axios.get(`/api/friends/status/${userId}`, { headers: { Authorization: `Bearer ${token}` } });
+          setFriendStatus(friendRes.data.status);
+          setFriendRequestId(friendRes.data.requestId || null);
+        } catch (_) {}
       }
     } catch (err) {
       setError('加载用户信息失败');
@@ -49,6 +56,39 @@ export default function UserProfile({ user }) {
       setError(err.response?.data?.message || '操作失败');
     } finally {
       setActionLoading(false);
+    }
+  };
+
+  const handleFriendAction = async () => {
+    setActionLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const headers = { Authorization: `Bearer ${token}` };
+      if (friendStatus === 'none') {
+        await axios.post(`/api/friends/request/${userId}`, {}, { headers });
+        setFriendStatus('request_sent');
+      } else if (friendStatus === 'request_received') {
+        await axios.post(`/api/friends/accept/${friendRequestId}`, {}, { headers });
+        setFriendStatus('friends');
+      } else if (friendStatus === 'friends') {
+        if (window.confirm('确定要删除该好友吗？')) {
+          await axios.delete(`/api/friends/${userId}`, { headers });
+          setFriendStatus('none');
+        }
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || '操作失败');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const getFriendBtnText = () => {
+    switch (friendStatus) {
+      case 'friends': return '已是好友';
+      case 'request_sent': return '请求已发送';
+      case 'request_received': return '接受好友请求';
+      default: return '+ 添加好友';
     }
   };
 
@@ -87,13 +127,22 @@ export default function UserProfile({ user }) {
           </div>
 
           {!isSelf && (
-            <button
-              className={`follow-btn ${following ? 'following' : ''}`}
-              onClick={handleFollowToggle}
-              disabled={actionLoading}
-            >
-              {actionLoading ? '处理中...' : following ? '✓ 已关注' : '+ 关注'}
-            </button>
+            <div className="user-profile-actions">
+              <button
+                className={`follow-btn ${following ? 'following' : ''}`}
+                onClick={handleFollowToggle}
+                disabled={actionLoading}
+              >
+                {actionLoading ? '处理中...' : following ? '已关注' : '+ 关注'}
+              </button>
+              <button
+                className={`friend-btn ${friendStatus === 'friends' ? 'is-friend' : friendStatus === 'request_sent' ? 'pending' : ''}`}
+                onClick={handleFriendAction}
+                disabled={actionLoading || friendStatus === 'request_sent'}
+              >
+                {actionLoading ? '处理中...' : getFriendBtnText()}
+              </button>
+            </div>
           )}
 
           <p className="user-profile-joined">

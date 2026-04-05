@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Notifications from './Notifications';
@@ -135,6 +135,7 @@ export default function Navbar({ user, onLogout, onUserUpdate }) {
                 {user.role === 'admin' && <span className="admin-badge">管理员</span>}
               </span>
               <Link to="/profile" className="nav-link profile-link">账户管理</Link>
+              <Link to="/friends" className="nav-link friends-link">好友</Link>
               {user.role === 'admin' && (
                 <Link to="/admin" className="nav-link admin-link">管理后台</Link>
               )}

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './Notifications.css';
 
@@ -6,7 +6,9 @@ const typeLabels = {
   like_post: '赞了你的帖子',
   like_comment: '赞了你的评论',
   comment: '评论了你的帖子',
-  follow: '关注了你'
+  follow: '关注了你',
+  friend_request: '请求添加你为好友',
+  friend_accept: '接受了你的好友请求'
 };
 
 export default function Notifications({ user, onClose }) {
