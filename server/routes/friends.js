@@ -56,7 +56,8 @@ router.post('/accept/:requestId', auth, async(req, res) => {
     try {
         const request = await FriendRequest.findById(req.params.requestId);
         if (!request) return res.status(404).json({ message: '请求不存在' });
-        if (request.to.toString() !== req.user._id.toString()) {
+        console.log('Accept debug - request.to:', request.to.toString(), 'req.user._id:', req.user._id.toString());
+        if (!request.to.equals(req.user._id)) {
             return res.status(403).json({ message: '无权操作' });
         }
         if (request.status !== 'pending') {
@@ -84,7 +85,7 @@ router.post('/reject/:requestId', auth, async(req, res) => {
     try {
         const request = await FriendRequest.findById(req.params.requestId);
         if (!request) return res.status(404).json({ message: '请求不存在' });
-        if (request.to.toString() !== req.user._id.toString()) {
+        if (!request.to.equals(req.user._id)) {
             return res.status(403).json({ message: '无权操作' });
         }
         if (request.status !== 'pending') {

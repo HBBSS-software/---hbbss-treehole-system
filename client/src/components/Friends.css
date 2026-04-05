@@ -8,6 +8,19 @@
     margin-bottom: 1.5rem;
 }
 
+.my-uid {
+    font-size: 14px;
+    color: #667eea;
+    font-weight: 600;
+    margin-top: 0.25rem;
+}
+
+.friend-uid {
+    font-size: 12px;
+    color: #667eea;
+    font-weight: 500;
+}
+
 .friends-header h1 {
     font-size: 24px;
     color: #333;
@@ -212,6 +225,132 @@
     font-size: 13px;
     font-weight: 600;
     flex-shrink: 0;
+}
+
+.search-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+}
+
+.uid-display {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    max-width: 320px;
+    min-height: 56px;
+}
+
+.uid-display-label {
+    font-size: 16px;
+    font-weight: 700;
+    color: #667eea;
+}
+
+.uid-display-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+    letter-spacing: 3px;
+    font-family: 'Courier New', monospace;
+}
+
+.uid-display-value:empty::after,
+.uid-display .uid-display-value {
+    color: #333;
+}
+
+.numpad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    width: 100%;
+    max-width: 320px;
+}
+
+.numpad-btn {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 22px;
+    font-weight: 700;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+}
+
+.numpad-btn:hover {
+    background: #f0f2ff;
+    border-color: #667eea;
+    transform: scale(1.02);
+}
+
+.numpad-btn:active {
+    background: #667eea;
+    color: white;
+    transform: scale(0.97);
+}
+
+.numpad-clear {
+    color: #e74c3c;
+    font-size: 18px;
+}
+
+.numpad-clear:active {
+    background: #e74c3c;
+    color: white;
+}
+
+.numpad-del {
+    font-size: 20px;
+    color: #f0ad4e;
+}
+
+.numpad-del:active {
+    background: #f0ad4e;
+    color: white;
+}
+
+.numpad-search {
+    width: 100%;
+    max-width: 320px;
+    padding: 14px;
+    font-size: 17px;
+    border-radius: 12px;
+    margin-top: 0.25rem;
+}
+
+.search-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 0.65rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.search-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.search-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 .error-message {

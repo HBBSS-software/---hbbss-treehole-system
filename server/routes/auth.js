@@ -43,7 +43,7 @@ router.post('/register', async(req, res) => {
         const user = new User({ username, password: hashedPassword, role: role || 'user' });
         await user.save();
         const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET || 'default_secret');
-        res.status(201).json({ message: 'User registered', userId: user._id, token, user: { _id: user._id, username: user.username, role: user.role, avatar: user.avatar } });
+        res.status(201).json({ message: 'User registered', userId: user._id, token, user: { _id: user._id, uid: user.uid, username: user.username, role: user.role, avatar: user.avatar } });
     } catch (e) { res.status(400).send(e.message); }
 });
 
@@ -56,7 +56,7 @@ router.post('/login', async(req, res) => {
             return res.status(401).send('Invalid credentials');
         }
         const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET || 'default_secret');
-        res.json({ token, user: { _id: user._id, username: user.username, role: user.role, avatar: user.avatar } });
+        res.json({ token, user: { _id: user._id, uid: user.uid, username: user.username, role: user.role, avatar: user.avatar } });
     } catch (e) { res.status(500).send(e.message); }
 });
 
@@ -87,13 +87,29 @@ router.put('/user', auth, async(req, res) => {
     } catch (e) { res.status(500).send(e.message); }
 });
 
+// 搜索用户（按UID精确搜索）
+router.get('/search', auth, async(req, res) => {
+    try {
+        const q = req.query.q;
+        if (!q || q.trim().length === 0) return res.json([]);
+        const uidNum = parseInt(q.trim(), 10);
+        if (isNaN(uidNum)) return res.json([]);
+        const users = await User.find({
+            uid: uidNum,
+            _id: { $ne: req.user._id }
+        }).select('uid username avatar description').limit(20);
+        res.json(users);
+    } catch (e) { res.status(500).send(e.message); }
+});
+
 // 获取公开用户资料
 router.get('/profile/:userId', async(req, res) => {
     try {
-        const user = await User.findById(req.params.userId).select('username description avatar followers following createdAt');
+        const user = await User.findById(req.params.userId).select('uid username description avatar followers following createdAt');
         if (!user) return res.status(404).json({ message: '用户不存在' });
         res.json({
             _id: user._id,
+            uid: user.uid,
             username: user.username,
             description: user.description,
             avatar: user.avatar,

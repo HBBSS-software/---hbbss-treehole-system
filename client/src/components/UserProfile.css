@@ -50,6 +50,13 @@
     margin-bottom: 0.5rem;
 }
 
+.user-profile-uid {
+    font-size: 14px;
+    color: #667eea;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
 .user-profile-description {
     color: #666;
     line-height: 1.6;
