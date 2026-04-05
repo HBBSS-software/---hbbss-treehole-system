@@ -2,25 +2,27 @@ const jwt = require('jsonwebtoken');
 
 const User = require('../models/User');
 
-const auth = async (req, res, next) => {
+const auth = async(req, res, next) => {
 
-  const token = req.header('Authorization')?.replace('Bearer ', '');
+    const token = req.header('Authorization') ? .replace('Bearer ', '');
 
-  if (!token) return res.status(401).send('No token');
+    if (!token) return res.status(401).send('No token');
 
-  try {
+    try {
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'default_secret');
 
-    req.user = await User.findById(decoded.id);
+        req.user = await User.findById(decoded.id);
 
-    next();
+        if (!req.user) return res.status(401).json({ error: '用户不存在，请重新登录' });
 
-  } catch (e) {
+        next();
 
-    res.status(401).send('Invalid token');
+    } catch (e) {
 
-  }
+        res.status(401).send('Invalid token');
+
+    }
 
 };
 
