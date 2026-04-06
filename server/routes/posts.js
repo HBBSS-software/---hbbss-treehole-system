@@ -65,20 +65,26 @@ router.get('/:id', async(req, res) => {
     } catch (e) { res.status(500).send(e.message); }
 });
 
-// Like post
+// Like / unlike post (toggle)
 router.post('/:id/like', auth, async(req, res) => {
     try {
         const post = await Post.findById(req.params.id);
-        if (!post.likes.includes(req.user._id)) {
+        const userId = req.user._id.toString();
+        const alreadyLiked = post.likes.some(id => id.toString() === userId);
+        if (alreadyLiked) {
+            post.likes = post.likes.filter(id => id.toString() !== userId);
+            await post.save();
+            res.send('Unliked');
+        } else {
             post.likes.push(req.user._id);
             await post.save();
-            if (post.author && post.author.toString() !== req.user._id.toString()) {
+            if (post.author && post.author.toString() !== userId) {
                 try {
                     await new Notification({ recipient: post.author, sender: req.user._id, type: 'like_post', post: post._id }).save();
                 } catch (_) {}
             }
+            res.send('Liked');
         }
-        res.send('Liked');
     } catch (e) { res.status(400).send(e.message); }
 });
 
