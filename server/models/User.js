@@ -13,6 +13,8 @@ const userSchema = new mongoose.Schema({
     role: { type: String, enum: ['admin', 'user'], default: 'user' },
     avatar: { type: String, default: null },
     description: { type: String, default: '', maxlength: 500 },
+    title: { type: String, default: '' },
+    titleColor: { type: String, default: '#667eea' },
     following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     friends: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],

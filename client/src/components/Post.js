@@ -1,182 +1,166 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import './Post.css';
 
 export default function Post({ user }) {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const [post, setPost] = useState(null);
-  const [comments, setComments] = useState([]);
-  const [commentText, setCommentText] = useState('');
-  const [liked, setLiked] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [lightboxImg, setLightboxImg] = useState(null);
+  var params = useParams();
+  var id = params.id;
+  var navigate = useNavigate();
+  var [post, setPost] = useState(null);
+  var [comments, setComments] = useState([]);
+  var [commentText, setCommentText] = useState('');
+  var [liked, setLiked] = useState(false);
+  var [loading, setLoading] = useState(true);
+  var [error, setError] = useState('');
+  var [lightboxImg, setLightboxImg] = useState(null);
 
-  useEffect(() => {
-    fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  var token = localStorage.getItem('token');
+  var headers = { Authorization: 'Bearer ' + token };
 
-  const fetchData = async () => {
-    try {
-      const postRes = await axios.get(`/api/posts/${id}`);
-      setPost(postRes.data);
-      setLiked(postRes.data.likes?.includes(user._id) || false);
-      const commentsRes = await axios.get(`/api/comments/post/${id}`);
-      setComments(commentsRes.data);
-    } catch (err) {
-      setError('加载失败');
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(function() { fetchData(); }, [id]);
 
-  const handleLike = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      await axios.post(`/api/posts/${id}/like`, {}, { headers: { Authorization: `Bearer ${token}` } });
-      setLiked(true);
-      setPost({ ...post, likes: [...(post.likes || []), user._id] });
-    } catch (err) {
-      setError('点赞失败');
-    }
-  };
+  function fetchData() {
+    Promise.all([
+      axios.get('/api/posts/' + id),
+      axios.get('/api/comments/post/' + id)
+    ]).then(function(results) {
+      var p = results[0].data;
+      setPost(p);
+      setLiked(p.likes && p.likes.includes(user._id) ? true : false);
+      setComments(results[1].data);
+    }).catch(function() {
+      setError('\u52A0\u8F7D\u5931\u8D25');
+    }).finally(function() { setLoading(false); });
+  }
 
-  const handleComment = async (e) => {
+  function handleLike() {
+    axios.post('/api/posts/' + id + '/like', {}, { headers: headers })
+      .then(function() {
+        setLiked(true);
+        setPost(function(prev) {
+          return Object.assign({}, prev, { likes: (prev.likes || []).concat([user._id]) });
+        });
+      })
+      .catch(function() { setError('\u70B9\u8D5E\u5931\u8D25'); });
+  }
+
+  function handleComment(e) {
     e.preventDefault();
     setError('');
-    try {
-      const token = localStorage.getItem('token');
-      await axios.post('/api/comments', { content: commentText, postId: id }, { headers: { Authorization: `Bearer ${token}` } });
-      setCommentText('');
-      fetchData();
-    } catch (err) {
-      setError('评论失败');
-    }
-  };
+    axios.post('/api/comments', { content: commentText, postId: id }, { headers: headers })
+      .then(function() { setCommentText(''); fetchData(); })
+      .catch(function() { setError('\u8BC4\u8BBA\u5931\u8D25'); });
+  }
 
-  const handleCommentLike = async (commentId) => {
-    try {
-      const token = localStorage.getItem('token');
-      await axios.post(`/api/comments/${commentId}/like`, {}, { headers: { Authorization: `Bearer ${token}` } });
-      fetchData();
-    } catch (err) {
-      setError('点赞失败');
-    }
-  };
+  function handleCommentLike(commentId) {
+    axios.post('/api/comments/' + commentId + '/like', {}, { headers: headers })
+      .then(function() { fetchData(); })
+      .catch(function() { setError('\u70B9\u8D5E\u5931\u8D25'); });
+  }
 
-  if (loading) return <div className="loading">加载中...</div>;
-  if (!post) return <div className="error">帖子不存在</div>;
+  if (loading) return React.createElement('div', {className: 'loading'}, '\u52A0\u8F7D\u4E2D...');
+  if (!post) return React.createElement('div', {className: 'error'}, '\u5E16\u5B50\u4E0D\u5B58\u5728');
 
-  return (
-    <div className="post-container">
-      <button className="back-btn" onClick={() => navigate(-1)}>← 返回</button>
+  function renderTitleBadge(author) {
+    if (!author || !author.title) return null;
+    return React.createElement('span', {
+      className: 'author-title-badge',
+      style: { borderColor: author.titleColor || '#667eea', color: author.titleColor || '#667eea' }
+    }, author.title);
+  }
 
-      <div className="post-detail">
-        <h1>{post.title}</h1>
-        <div className="post-meta">
-          <span>
-            作者:{' '}
-            <Link to={`/user/${post.author?._id}`} className="author-link" onClick={e => e.stopPropagation()}>
-              {post.author?.username}
-            </Link>
-          </span>
-          <span>发布时间: {new Date(post.createdAt).toLocaleDateString()}</span>
-        </div>
-
-        {post.tags && post.tags.length > 0 && (
-          <div className="tags-row">
-            {post.tags.map((tag, i) => (
-              <span key={i} className="tag-pill">{tag}</span>
-            ))}
-          </div>
-        )}
-
-        <div className="post-content">
-          {post.content && <p>{post.content}</p>}
-          {post.images?.length > 0 && (
-            <div className="images-gallery">
-              {post.images.map((img, i) => (
-                <img
-                  key={i}
-                  src={img}
-                  alt={`图片${i + 1}`}
-                  className="clickable-image"
-                  onClick={() => setLightboxImg(img)}
-                />
-              ))}
-            </div>
-          )}
-          {post.poll && (
-            <div className="poll-section">
-              <h3>{post.poll.question}</h3>
-              <div className="poll-options">
-                {post.poll.options?.map((opt, i) => (
-                  <div key={i} className="poll-option">
-                    <label>
-                      <input type="radio" name="poll" />
-                      {opt}
-                    </label>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="post-actions">
-          <button onClick={handleLike} className={`like-btn ${liked ? 'liked' : ''}`}>
-            ❤️ {post.likes?.length || 0}
-          </button>
-        </div>
-      </div>
-
-      {error && <div className="error-message">{error}</div>}
-
-      <div className="comments-section">
-        <h2>评论 ({comments.length})</h2>
-        <form onSubmit={handleComment} className="comment-form">
-          <textarea
-            value={commentText}
-            onChange={(e) => setCommentText(e.target.value)}
-            required
-            placeholder="输入评论..."
-            rows="3"
-          />
-          <button type="submit">发表评论</button>
-        </form>
-        <div className="comments-list">
-          {comments.length === 0 ? (
-            <div className="empty-state">暂无评论</div>
-          ) : (
-            comments.map((comment) => (
-              <div key={comment._id} className="comment-item">
-                <div className="comment-header">
-                  <strong>
-                    <Link to={`/user/${comment.author?._id}`} className="author-link">
-                      {comment.author?.username}
-                    </Link>
-                  </strong>
-                  <span className="time">{new Date(comment.createdAt).toLocaleDateString()}</span>
-                </div>
-                <p className="comment-text">{comment.content}</p>
-                <button onClick={() => handleCommentLike(comment._id)} className="comment-like">
-                  👍 {comment.likes?.length || 0}
-                </button>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-
-      {lightboxImg && (
-        <div className="lightbox-overlay" onClick={() => setLightboxImg(null)}>
-          <button className="lightbox-close" onClick={() => setLightboxImg(null)}>✕</button>
-          <img src={lightboxImg} alt="预览" className="lightbox-image" onClick={e => e.stopPropagation()} />
-        </div>
-      )}
-    </div>
+  return React.createElement('div', {className: 'post-container'},
+    React.createElement('button', {className: 'back-btn', onClick: function() { navigate(-1); }}, '\u2190 \u8FD4\u56DE'),
+    React.createElement('div', {className: 'post-detail'},
+      React.createElement('h1', null, post.title),
+      React.createElement('div', {className: 'post-meta'},
+        React.createElement('span', null,
+          '\u4F5C\u8005: ',
+          React.createElement(Link, {to: '/user/' + (post.author && post.author._id), className: 'author-link'}, post.author && post.author.username),
+          renderTitleBadge(post.author)
+        ),
+        React.createElement('span', null, '\u53D1\u5E03\u65F6\u95F4: ' + new Date(post.createdAt).toLocaleDateString())
+      ),
+      post.tags && post.tags.length > 0
+        ? React.createElement('div', {className: 'tags-row'},
+            post.tags.map(function(tag, i) {
+              return React.createElement('span', {key: i, className: 'tag-pill'}, tag);
+            })
+          )
+        : null,
+      React.createElement('div', {className: 'post-content'},
+        post.content ? React.createElement('p', null, post.content) : null,
+        post.images && post.images.length > 0
+          ? React.createElement('div', {className: 'images-gallery'},
+              post.images.map(function(img, i) {
+                return React.createElement('img', {
+                  key: i, src: img, alt: '\u56FE\u7247' + (i + 1),
+                  className: 'clickable-image',
+                  onClick: function() { setLightboxImg(img); }
+                });
+              })
+            )
+          : null,
+        post.poll
+          ? React.createElement('div', {className: 'poll-section'},
+              React.createElement('h3', null, post.poll.question),
+              React.createElement('div', {className: 'poll-options'},
+                post.poll.options ? post.poll.options.map(function(opt, i) {
+                  return React.createElement('div', {key: i, className: 'poll-option'},
+                    React.createElement('label', null,
+                      React.createElement('input', {type: 'radio', name: 'poll'}),
+                      opt
+                    )
+                  );
+                }) : null
+              )
+            )
+          : null
+      ),
+      React.createElement('div', {className: 'post-actions'},
+        React.createElement('button', {onClick: handleLike, className: 'like-btn' + (liked ? ' liked' : '')},
+          '\u2764\uFE0F ' + ((post.likes && post.likes.length) || 0)
+        )
+      )
+    ),
+    error ? React.createElement('div', {className: 'error-message'}, error) : null,
+    React.createElement('div', {className: 'comments-section'},
+      React.createElement('h2', null, '\u8BC4\u8BBA(' + comments.length + ')'),
+      React.createElement('form', {onSubmit: handleComment, className: 'comment-form'},
+        React.createElement('textarea', {
+          value: commentText,
+          onChange: function(e) { setCommentText(e.target.value); },
+          required: true,
+          placeholder: '\u8F93\u5165\u8BC4\u8BBA...',
+          rows: 3
+        }),
+        React.createElement('button', {type: 'submit'}, '\u53D1\u8868\u8BC4\u8BBA')
+      ),
+      React.createElement('div', {className: 'comments-list'},
+        comments.length === 0
+          ? React.createElement('div', {className: 'empty-state'}, '\u6682\u65E0\u8BC4\u8BBA')
+          : comments.map(function(comment) {
+              return React.createElement('div', {key: comment._id, className: 'comment-item'},
+                React.createElement('div', {className: 'comment-header'},
+                  React.createElement('strong', null,
+                    React.createElement(Link, {to: '/user/' + (comment.author && comment.author._id), className: 'author-link'}, comment.author && comment.author.username)
+                  ),
+                  React.createElement('span', {className: 'time'}, new Date(comment.createdAt).toLocaleDateString())
+                ),
+                React.createElement('p', {className: 'comment-text'}, comment.content),
+                React.createElement('button', {onClick: function() { handleCommentLike(comment._id); }, className: 'comment-like'},
+                  '\uD83D\uDC4D ' + ((comment.likes && comment.likes.length) || 0)
+                )
+              );
+            })
+      )
+    ),
+    lightboxImg
+      ? React.createElement('div', {className: 'lightbox-overlay', onClick: function() { setLightboxImg(null); }},
+          React.createElement('button', {className: 'lightbox-close', onClick: function() { setLightboxImg(null); }}, '\u2715'),
+          React.createElement('img', {src: lightboxImg, alt: '\u9884\u89C8', className: 'lightbox-image', onClick: function(e) { e.stopPropagation(); }})
+        )
+      : null
   );
 }

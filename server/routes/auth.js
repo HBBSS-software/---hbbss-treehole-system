@@ -105,7 +105,7 @@ router.get('/search', auth, async(req, res) => {
 // 获取公开用户资料
 router.get('/profile/:userId', async(req, res) => {
     try {
-        const user = await User.findById(req.params.userId).select('uid username description avatar followers following createdAt');
+        const user = await User.findById(req.params.userId).select('uid username description avatar followers following title titleColor createdAt');
         if (!user) return res.status(404).json({ message: '用户不存在' });
         res.json({
             _id: user._id,
@@ -113,6 +113,8 @@ router.get('/profile/:userId', async(req, res) => {
             username: user.username,
             description: user.description,
             avatar: user.avatar,
+            title: user.title,
+            titleColor: user.titleColor,
             followersCount: user.followers.length,
             followingCount: user.following.length,
             createdAt: user.createdAt
@@ -161,6 +163,28 @@ router.post('/unfollow/:userId', auth, async(req, res) => {
         targetUser.followers = targetUser.followers.filter(id => id.toString() !== req.user._id.toString());
         await targetUser.save();
         res.json({ message: '取消关注成功' });
+    } catch (e) { res.status(500).send(e.message); }
+});
+
+// 管理员设置用户称号
+router.put('/title/:userId', auth, async(req, res) => {
+    try {
+        if (req.user.role !== 'admin') return res.status(403).json({ message: '仅管理员可操作' });
+        const { title, titleColor } = req.body;
+        const update = { title: title || '' };
+        if (titleColor) update.titleColor = titleColor;
+        const user = await User.findByIdAndUpdate(req.params.userId, update, { new: true }).select('uid username title titleColor');
+        if (!user) return res.status(404).json({ message: '用户不存在' });
+        res.json(user);
+    } catch (e) { res.status(500).send(e.message); }
+});
+
+// 管理员搜索所有用户（用于称号管理）
+router.get('/all-users', auth, async(req, res) => {
+    try {
+        if (req.user.role !== 'admin') return res.status(403).json({ message: '仅管理员可操作' });
+        const users = await User.find().select('uid username title titleColor avatar role');
+        res.json(users);
     } catch (e) { res.status(500).send(e.message); }
 });
 
