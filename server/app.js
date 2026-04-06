@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
+const fs = require('fs');
 const multer = require('multer');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
@@ -49,10 +50,20 @@ async function seedData() {
 // 启动内存 MongoDB 并连接
 async function startServer() {
     try {
-        // 启动内存 MongoDB
-        const mongod = await MongoMemoryServer.create();
+        // 启动内存 MongoDB（数据持久化到磁盘）
+        const dbPath = path.join(__dirname, '..', 'data', 'db');
+        if (!fs.existsSync(dbPath)) {
+            fs.mkdirSync(dbPath, { recursive: true });
+        }
+        const mongod = await MongoMemoryServer.create({
+            instance: {
+                dbPath: dbPath,
+                storageEngine: 'wiredTiger'
+            }
+        });
         const mongoUri = mongod.getUri();
         console.log('MongoDB Memory Server started at:', mongoUri);
+        console.log('数据持久化目录:', dbPath);
 
         // 连接 MongoDB
         await mongoose.connect(mongoUri);
@@ -68,6 +79,7 @@ async function startServer() {
         app.use('/api/comments', require('./routes/comments'));
         app.use('/api/notifications', require('./routes/notifications'));
         app.use('/api/friends', require('./routes/friends'));
+        app.use('/api/chat', require('./routes/chat'));
 
         app.get('/', (req, res) => {
             res.json({ message: '🌳 树洞系统 API 运行中' });

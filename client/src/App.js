@@ -11,6 +11,7 @@ const Admin = lazy(() => import('./components/Admin'));
 const Profile = lazy(() => import('./components/Profile'));
 const UserProfile = lazy(() => import('./components/UserProfile'));
 const Friends = lazy(() => import('./components/Friends'));
+const Chat = lazy(() => import('./components/Chat'));
 
 function App() {
   const [user, setUser] = useState(null);
@@ -35,24 +36,23 @@ function App() {
     localStorage.removeItem('user');
     setUser(null);
   };
-  if (loading) { return <div className="loading">加载中...</div>; }
-  return (
-    <Router>
-      <Navbar user={user} onLogout={handleLogout} onUserUpdate={handleUserUpdate} />
-      <Suspense fallback={<div className="loading">加载中...</div>}>
-        <Routes>
-          <Route path="/login" element={!user ? <Login onLogin={handleLogin} /> : <Navigate to="/" />} />
-          <Route path="/" element={user ? <Home user={user} /> : <Navigate to="/login" />} />
-          <Route path="/section/:id" element={user ? <Section user={user} /> : <Navigate to="/login" />} />
-          <Route path="/post/:id" element={user ? <Post user={user} /> : <Navigate to="/login" />} />
-          <Route path="/profile" element={user ? <Profile user={user} onUserUpdate={handleUserUpdate} /> : <Navigate to="/login" />} />
-          <Route path="/user/:userId" element={user ? <UserProfile user={user} /> : <Navigate to="/login" />} />
-          <Route path="/friends" element={user ? <Friends user={user} /> : <Navigate to="/login" />} />
-          {user?.role === 'admin' && <Route path="/admin" element={<Admin user={user} />} />}
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-      </Suspense>
-    </Router>
+  if (loading) { return React.createElement('div', {className: 'loading'}, '\u52A0\u8F7D\u4E2D...'); }
+  return React.createElement(Router, null,
+    React.createElement(Navbar, {user: user, onLogout: handleLogout, onUserUpdate: handleUserUpdate}),
+    React.createElement(Suspense, {fallback: React.createElement('div', {className: 'loading'}, '\u52A0\u8F7D\u4E2D...')},
+      React.createElement(Routes, null,
+        React.createElement(Route, {path: '/login', element: !user ? React.createElement(Login, {onLogin: handleLogin}) : React.createElement(Navigate, {to: '/'})}),
+        React.createElement(Route, {path: '/', element: user ? React.createElement(Home, {user: user}) : React.createElement(Navigate, {to: '/login'})}),
+        React.createElement(Route, {path: '/section/:id', element: user ? React.createElement(Section, {user: user}) : React.createElement(Navigate, {to: '/login'})}),
+        React.createElement(Route, {path: '/post/:id', element: user ? React.createElement(Post, {user: user}) : React.createElement(Navigate, {to: '/login'})}),
+        React.createElement(Route, {path: '/profile', element: user ? React.createElement(Profile, {user: user, onUserUpdate: handleUserUpdate}) : React.createElement(Navigate, {to: '/login'})}),
+        React.createElement(Route, {path: '/user/:userId', element: user ? React.createElement(UserProfile, {user: user}) : React.createElement(Navigate, {to: '/login'})}),
+        React.createElement(Route, {path: '/friends', element: user ? React.createElement(Friends, {user: user}) : React.createElement(Navigate, {to: '/login'})}),
+        React.createElement(Route, {path: '/chat/:friendId', element: user ? React.createElement(Chat, {user: user}) : React.createElement(Navigate, {to: '/login'})}),
+        user && user.role === 'admin' ? React.createElement(Route, {path: '/admin', element: React.createElement(Admin, {user: user})}) : null,
+        React.createElement(Route, {path: '*', element: React.createElement(Navigate, {to: '/'})})
+      )
+    )
   );
 }
 export default App;
