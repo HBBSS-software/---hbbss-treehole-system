@@ -80,6 +80,7 @@ async function startServer() {
         app.use('/api/notifications', require('./routes/notifications'));
         app.use('/api/friends', require('./routes/friends'));
         app.use('/api/chat', require('./routes/chat'));
+        app.use('/api/announcements', require('./routes/announcements'));
 
         app.get('/', (req, res) => {
             res.json({ message: '🌳 树洞系统 API 运行中' });

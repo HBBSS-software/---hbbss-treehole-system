@@ -43,7 +43,7 @@ router.post('/register', async(req, res) => {
         const user = new User({ username, password: hashedPassword, role: role || 'user' });
         await user.save();
         const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET || 'default_secret');
-        res.status(201).json({ message: 'User registered', userId: user._id, token, user: { _id: user._id, uid: user.uid, username: user.username, role: user.role, avatar: user.avatar } });
+        res.status(201).json({ message: 'User registered', userId: user._id, token, user: { _id: user._id, uid: user.uid, username: user.username, role: user.role, avatar: user.avatar, background: user.background || '' } });
     } catch (e) { res.status(400).send(e.message); }
 });
 
@@ -56,7 +56,7 @@ router.post('/login', async(req, res) => {
             return res.status(401).send('Invalid credentials');
         }
         const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET || 'default_secret');
-        res.json({ token, user: { _id: user._id, uid: user.uid, username: user.username, role: user.role, avatar: user.avatar } });
+        res.json({ token, user: { _id: user._id, uid: user.uid, username: user.username, role: user.role, avatar: user.avatar, background: user.background || '' } });
     } catch (e) { res.status(500).send(e.message); }
 });
 
@@ -186,6 +186,25 @@ router.get('/all-users', auth, async(req, res) => {
         const users = await User.find().select('uid username title titleColor avatar role');
         res.json(users);
     } catch (e) { res.status(500).send(e.message); }
+});
+
+// Upload background image
+router.post('/upload-background', auth, upload.single('background'), async(req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ error: '没有上传文件' });
+        const bgUrl = `/uploads/avatars/${req.file.filename}`;
+        const user = await User.findByIdAndUpdate(req.user._id, { background: bgUrl }, { new: true });
+        res.json({ background: user.background });
+    } catch (e) { res.status(400).json({ error: e.message }); }
+});
+
+// Set background (preset or clear)
+router.put('/background', auth, async(req, res) => {
+    try {
+        const { background } = req.body;
+        const user = await User.findByIdAndUpdate(req.user._id, { background: background || '' }, { new: true });
+        res.json({ background: user.background });
+    } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
 module.exports = router;

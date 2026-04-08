@@ -1,5 +1,6 @@
 const express = require('express');
 const Post = require('../models/Post');
+const User = require('../models/User');
 const Notification = require('../models/Notification');
 const auth = require('../middleware/auth');
 const router = express.Router();
@@ -42,6 +43,17 @@ router.get('/section/:sectionId', async(req, res) => {
     try {
         const posts = await Post.find({ section: req.params.sectionId, status: 'approved' }).populate('author', 'username title titleColor');
         res.json(posts);
+    } catch (e) { res.status(500).send(e.message); }
+});
+
+// Get user favorites - MUST be before /:id
+router.get('/user/favorites', auth, async(req, res) => {
+    try {
+        const user = await User.findById(req.user._id).populate({
+            path: 'favorites',
+            populate: { path: 'author', select: 'username title titleColor' }
+        });
+        res.json(user.favorites || []);
     } catch (e) { res.status(500).send(e.message); }
 });
 
@@ -95,6 +107,34 @@ router.put('/:id/approve', auth, async(req, res) => {
         await Post.findByIdAndUpdate(req.params.id, { status: 'approved' });
         res.send('Approved');
     } catch (e) { res.status(400).send(e.message); }
+});
+
+// Toggle favorite
+router.post('/:id/favorite', auth, async(req, res) => {
+    try {
+        const userId = req.user._id.toString();
+        const postId = req.params.id;
+        const user = await User.findById(userId);
+        const idx = user.favorites.findIndex(fid => fid.toString() === postId);
+        if (idx >= 0) {
+            user.favorites.splice(idx, 1);
+            await user.save();
+            res.send('Unfavorited');
+        } else {
+            user.favorites.push(postId);
+            await user.save();
+            res.send('Favorited');
+        }
+    } catch (e) { res.status(400).send(e.message); }
+});
+
+// Check if post is favorited
+router.get('/:id/favorite', auth, async(req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+        const isFav = user.favorites.some(fid => fid.toString() === req.params.id);
+        res.json({ favorited: isFav });
+    } catch (e) { res.status(500).send(e.message); }
 });
 
 module.exports = router;

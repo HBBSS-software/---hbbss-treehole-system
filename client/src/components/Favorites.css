@@ -1,0 +1,99 @@
+.favorites-container {
+    max-width: 700px;
+    margin: 80px auto 20px;
+    padding: 0 15px;
+}
+
+.favorites-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.favorites-header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #333;
+}
+
+.favorites-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.favorite-item {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.favorite-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.favorite-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.favorite-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    text-decoration: none;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.favorite-title:hover {
+    color: #667eea;
+}
+
+.favorite-meta {
+    display: flex;
+    gap: 15px;
+    font-size: 0.85rem;
+    color: #888;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+.favorite-preview {
+    font-size: 0.9rem;
+    color: #666;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.remove-fav-btn {
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    color: #ccc;
+    cursor: pointer;
+    padding: 5px 8px;
+    border-radius: 6px;
+    transition: color 0.2s, background 0.2s;
+    flex-shrink: 0;
+    margin-left: 10px;
+}
+
+.remove-fav-btn:hover {
+    color: #e74c3c;
+    background: #fff0f0;
+}
+
+.empty-state {
+    text-align: center;
+    color: #999;
+    padding: 60px 20px;
+    font-size: 1.1rem;
+}

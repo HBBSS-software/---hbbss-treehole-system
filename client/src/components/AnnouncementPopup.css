@@ -1,0 +1,107 @@
+.announcement-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 20px;
+}
+
+.announcement-popup {
+    background: white;
+    border-radius: 16px;
+    max-width: 500px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    animation: annSlideIn 0.3s ease;
+}
+
+@keyframes annSlideIn {
+    from {
+        transform: translateY(-30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.announcement-popup-header {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 18px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.announcement-popup-header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.announcement-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.3rem;
+    cursor: pointer;
+    opacity: 0.8;
+    padding: 0;
+    line-height: 1;
+}
+
+.announcement-close:hover {
+    opacity: 1;
+}
+
+.announcement-popup-body {
+    padding: 24px;
+}
+
+.announcement-popup-title {
+    margin: 0 0 12px 0;
+    font-size: 1.15rem;
+    color: #333;
+}
+
+.announcement-popup-content {
+    margin: 0 0 16px 0;
+    color: #555;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+.announcement-popup-date {
+    font-size: 0.8rem;
+    color: #aaa;
+}
+
+.announcement-popup-footer {
+    padding: 0 24px 20px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.announcement-ok-btn {
+    padding: 10px 32px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.announcement-ok-btn:hover {
+    opacity: 0.9;
+}

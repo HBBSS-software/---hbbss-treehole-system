@@ -11,6 +11,7 @@ export default function Post({ user }) {
     var [comments, setComments] = useState([]);
     var [commentText, setCommentText] = useState('');
     var [liked, setLiked] = useState(false);
+    var [favorited, setFavorited] = useState(false);
     var [loading, setLoading] = useState(true);
     var [error, setError] = useState('');
     var [lightboxImg, setLightboxImg] = useState(null);
@@ -29,6 +30,9 @@ export default function Post({ user }) {
             setPost(p);
             setLiked(p.likes && p.likes.includes(user._id) ? true : false);
             setComments(results[1].data);
+            axios.get('/api/posts/' + id + '/favorite', { headers: headers })
+                .then(function(r) { setFavorited(r.data && r.data.favorited); })
+                .catch(function() {});
         }).catch(function() {
             setError('\u52A0\u8F7D\u5931\u8D25');
         }).finally(function() { setLoading(false); });
@@ -51,12 +55,20 @@ export default function Post({ user }) {
             .catch(function() { setError('\u70B9\u8D5E\u5931\u8D25'); });
     }
 
+    function handleFavorite() {
+        axios.post('/api/posts/' + id + '/favorite', {}, { headers: headers })
+            .then(function(res) { setFavorited(res.data === 'Favorited'); })
+            .catch(function() { setError('\u6536\u85CF\u5931\u8D25'); });
+    }
+
     function handleComment(e) {
         e.preventDefault();
         setError('');
         axios.post('/api/comments', { content: commentText, postId: id }, { headers: headers })
-            .then(function() { setCommentText('');
-                fetchData(); })
+            .then(function() {
+                setCommentText('');
+                fetchData();
+            })
             .catch(function() { setError('\u8BC4\u8BBA\u5931\u8D25'); });
     }
 
@@ -130,6 +142,9 @@ export default function Post({ user }) {
             React.createElement('div', { className: 'post-actions' },
                 React.createElement('button', { onClick: handleLike, className: 'like-btn' + (liked ? ' liked' : '') },
                     '\u2764\uFE0F ' + ((post.likes && post.likes.length) || 0)
+                ),
+                React.createElement('button', { onClick: handleFavorite, className: 'fav-btn' + (favorited ? ' favorited' : '') },
+                    (favorited ? '\u2B50' : '\u2606') + ' \u6536\u85CF'
                 )
             )
         ),
